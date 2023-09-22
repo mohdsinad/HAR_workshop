@@ -7,8 +7,6 @@ from tempfile import mkdtemp
 from scipy.stats import kendalltau
 from joblib import Parallel, delayed, Memory
 
-import json
-
 def dep2mi(x):
     MAX_VAL = 0.999999;
     if(x>MAX_VAL):
@@ -115,3 +113,4 @@ def feature_select(X, Y, num_features_to_select=None, K_MAX=1000, estimator=mi_t
         pass
 
     return selected_feature_idxs
+
