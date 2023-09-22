@@ -1,14 +1,30 @@
 import os
 import shutil
-import joblib
-import estimators
 import numpy as np
 
 from tqdm import tqdm
 from tempfile import mkdtemp
+from scipy.stats import kendalltau
 from joblib import Parallel, delayed, Memory
 
 import json
+
+def dep2mi(x):
+    MAX_VAL = 0.999999;
+    if(x>MAX_VAL):
+        x = MAX_VAL
+    elif(x<-MAX_VAL):
+        x = -MAX_VAL
+    
+    y = -0.5*np.log(1-x*x);
+
+    return y
+
+def mi_tau(x,y):
+    tau_val,p_val = kendalltau(x,y)
+    if(np.isnan(tau_val)):
+        return 0
+    return dep2mi(tau_val)
 
 def generic_combined_scorer(x1, o1, i_1, x2, o2, i_2, y, h):
     s1 = h(x1, y)
@@ -16,7 +32,7 @@ def generic_combined_scorer(x1, o1, i_1, x2, o2, i_2, y, h):
     o1[i_1] = s1
     o2[i_2] = s2
 
-def feature_select(X, Y, num_features_to_select=None, K_MAX=1000, estimator=estimators.mi_tau, n_jobs=-1,verbose=True):
+def feature_select(X, Y, num_features_to_select=None, K_MAX=1000, estimator=mi_tau, n_jobs=-1,verbose=True):
     '''
     Implements the MRMR algorithm for feature-selection: http://ieeexplore.ieee.org/document/1453511/
 
